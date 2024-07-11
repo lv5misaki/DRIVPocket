@@ -16,7 +16,7 @@ Train data: Train dataset scPDB can be downloaded from here (http://bioinfo-phar
 
 Test data: Test datasets can be downloaded according to the following links, COACH420 (https://github.com/rdk/p2rank-datasets/tree/master/coach420), HOLO4k (https://github.com/rdk/p2rank-datasets/tree/master/holo4k), SC6K (https://github.com/devalab/DeepPocket), PDBbind (http://www.pdbbind.org.cn/download.php). 
 
-You can make your own preprocessed data by referring to [DeepPokcet](https://github.com/devalab/DeepPocket).Also, You can download our pre-processed train and test data DRIVPocket/dataset from Baidu Cloud Disk (https://pan.baidu.com/s/1xgQYgtFsQXI2EofCxh60Bw code：4ua7).
+You can make your own preprocessed data by referring to [DeepPokcet](https://github.com/devalab/DeepPocket).Also, You can download our pre-processed train and test data DRIVPocket/dataset from Baidu Cloud Disk (https://pan.baidu.com/s/1bSrU6TruqvwBv76rZ52ZLg code: a33e).
 
 ## Train
 If you want to train DRIVPocket by yourself, we provide the dataparallel and distribute code.
@@ -33,7 +33,7 @@ Also, we provide a command for distribute mode.
 
 ## Test
 #### 1. Pre-trained model
-You can download our pretrained model in [here]().
+You can download our pretrained model in [here](https://pan.baidu.com/s/1bSrU6TruqvwBv76rZ52ZLg), code: a33e.
 
 #### 2. Evaluation
 To test DRIVPocket on COACH420 in terms of DCC and DVO, run the following command:
