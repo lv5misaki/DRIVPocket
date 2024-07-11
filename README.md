@@ -2,7 +2,7 @@
 
 This repository contains the source code, trained models and the test sets for DRIVPokect.
 
-# Introduction
+## Introduction
 
 The prediction of protein binding sites is a critical step in drug design. However, the task is challenging due to the small size of the binding sites and the significant variation in size between different proteins. To address these issues, we propose a novel protein binding site prediction model called DRIVPocket, based on dual-stream rotational invariance and voxel feature fusion. Remarkably, DRIVPocket can simultaneously predict the entire pocket region and the atoms near the cavity.
 
@@ -10,11 +10,48 @@ Specifically, we first represent the protein in two modalities, voxel and point 
 
 Experiments show that DRIVPokcet improves by 5% on DVO and 1%-4% DCA Top-n prediction compared with previous state-of-the-art methods on four benchmark data sets.
 
-[overview](overview.png)
-# Datasets
+![overview](overview.png)
+## Datasets
+Train data: Train dataset scPDB can be downloaded from here (http://bioinfo-pharma.u-strasbg.fr/scPDB/).
+
+Test data: Test datasets can be downloaded according to the following links, COACH420 (https://github.com/rdk/p2rank-datasets/tree/master/coach420), HOLO4k (https://github.com/rdk/p2rank-datasets/tree/master/holo4k), SC6K (https://github.com/devalab/DeepPocket), PDBbind (http://www.pdbbind.org.cn/download.php). 
+
+You can make your own preprocessed data by referring to [DeepPokcet](https://github.com/devalab/DeepPocket).Also, You can download our pre-processed train and test data DRIVPocket/dataset from Baidu Cloud Disk (https://pan.baidu.com/s/1xgQYgtFsQXI2EofCxh60Bw code：4ua7).
+
+## Train
+If you want to train DRIVPocket by yourself, we provide the dataparallel and distribute code.
+
+You can use the command to train your model in data parallel.
+```
+ python train_dataparallel.py -b 20 -o ./model_saves/seg_train -e 150 -r seg_train
+```
+
+Also, we provide a command for distribute mode.
+```
+  torchrun --nproc_per_node=4 train_distribute.py -b 5 -o ./model_saves/seg_train -e 150 -r seg_train
+```
+
+## Test
+#### 1. Pre-trained model
+You can download our pretrained model in [here]().
+
+#### 2. Evaluation
+To test DRIVPocket on COACH420 in terms of DCC and DVO, run the following command:
+
+```
+python test.py --test_set coach420
+```
+
+To test DRIVPocket on COACH420 in terms of DCA top-n, run the following command:
+
+```
+python test.py --test_set coach420 --is_dca 1 --rank 0
+```
+
+To test DRIVPocket on COACH420 in terms of DCA top-n+2, run the following command:
+
+```
+python test.py --test_set coach420 --is_dca 1 --rank 2
+```
 
 
-# Train
-
-
-# Test
