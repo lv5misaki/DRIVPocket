@@ -1,4 +1,4 @@
-# DRIVPocket
+# DRIVPocket: A Dual-stream Rotation Invariance in Feature Sampling and Voxel Fusion Approach for Protein Binding Site Prediction
 
 This repository contains the source code, trained models and the test sets for DRIVPokect.
 
@@ -10,7 +10,7 @@ Specifically, we first represent the protein in two modalities, voxel and point 
 
 Experiments show that DRIVPokcet improves by 5% on DVO and 1%-4% DCA Top-n prediction compared with previous state-of-the-art methods on four benchmark data sets.
 
-[overview]()
+[overview](overview.png)
 # Datasets
 
 
