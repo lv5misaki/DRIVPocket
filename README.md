@@ -44,19 +44,19 @@ You can download our pretrained model in [here](https://pan.baidu.com/s/1bSrU6Tr
 To test DRIVPocket on COACH420 in terms of DCC and DVO, run the following command:
 
 ```
-python test.py --test_set coach420
+python test.py --test_set coach420 --DATA_ROOT coach420 --model_path checkpoint.pth.tar
 ```
 
 To test DRIVPocket on COACH420 in terms of DCA top-n, run the following command:
 
 ```
-python test.py --test_set coach420 --is_dca 1 --rank 0
+python test.py --test_set coach420 --is_dca 1 --rank 0 --DATA_ROOT coach420 --model_path checkpoint.pth.tar
 ```
 
 To test DRIVPocket on COACH420 in terms of DCA top-n+2, run the following command:
 
 ```
-python test.py --test_set coach420 --is_dca 1 --rank 2
+python test.py --test_set coach420 --is_dca 1 --rank 2 --DATA_ROOT coach420 --model_path checkpoint.pth.tar
 ```
 
 
