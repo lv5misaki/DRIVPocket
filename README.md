@@ -11,6 +11,10 @@ Specifically, we first represent the protein in two modalities, voxel and point 
 Experiments show that DRIVPokcet improves by 5% on DVO and 1%-4% DCA Top-n prediction compared with previous state-of-the-art methods on four benchmark data sets.
 
 ![overview](overview.png)
+## Requirements
+[Fpocket](https://github.com/Discngine/fpocket), [Pytorch](https://pytorch.org/), [libmolgrid](https://github.com/gnina/libmolgrid), [Biopython](https://biopython.org/) and other frequently used python packages
+
+To reproduce the substructure benchmark [Prody](https://prody.csb.pitt.edu/) and [Rdkit](https://www.rdkit.org/) are also required.
 ## Datasets
 Train data: Train dataset scPDB can be downloaded from here (http://bioinfo-pharma.u-strasbg.fr/scPDB/).
 
