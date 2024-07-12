@@ -23,16 +23,17 @@ Test data: Test datasets can be downloaded according to the following links, COA
 You can make your own preprocessed data by referring to [DeepPokcet](https://github.com/devalab/DeepPocket).Also, You can download our pre-processed train and test data DRIVPocket/dataset from Baidu Cloud Disk (https://pan.baidu.com/s/1bSrU6TruqvwBv76rZ52ZLg code: a33e).
 
 ## Train
-If you want to train DRIVPocket by yourself, we provide the dataparallel and distribute code. Additionly, we use [wandb](https://wandb.ai/site) to track training performance. It's free and easy to use. If you want to avoid using wandb, simply comment out all lines that contain "wandb" in the training script.
+If you want to train DRIVPocket by yourself, we provide the dataparallel and distribute code. Additionly, we use [wandb](https://wandb.ai/site) to track training performance. It's free and easy to use. If you want to avoid using wandb, simply use '--usewandb 0' to disable the use of wandb.
 
 You can use the command to train your model in data parallel.
 ```
- python train_dataparallel.py -b 20 -o ./model_saves/seg_train -e 150 -r seg_train
+ python train_dataparallel.py -b 20 -o ./model_saves/seg_train -e 150 -r seg_train -d scPDB --train_recmolcache scPDB_new.molcache2 --test_recmolcache scPDB_new.molcache2
+
 ```
 
 Also, we provide a command for distribute mode.
 ```
-  torchrun --nproc_per_node=4 train_distribute.py -b 5 -o ./model_saves/seg_train -e 150 -r seg_train
+  torchrun --nproc_per_node=4 train_distribute.py -b 5 -o ./model_saves/seg_train -e 150 -r seg_train -d scPDB --train_recmolcache scPDB_new.molcache2 --test_recmolcache scPDB_new.molcache2
 ```
 
 ## Test
