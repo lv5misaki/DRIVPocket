@@ -23,7 +23,7 @@ Test data: Test datasets can be downloaded according to the following links, COA
 You can make your own preprocessed data by referring to [DeepPokcet](https://github.com/devalab/DeepPocket).Also, You can download our pre-processed train and test data DRIVPocket/dataset from Baidu Cloud Disk (https://pan.baidu.com/s/1bSrU6TruqvwBv76rZ52ZLg code: a33e).
 
 ## Train
-If you want to train DRIVPocket by yourself, we provide the dataparallel and distribute code.
+If you want to train DRIVPocket by yourself, we provide the dataparallel and distribute code. Additionly, we use [wandb](https://wandb.ai/site) to track training performance. It's free and easy to use. If you want to avoid using wandb, simply comment out all lines that contain "wandb" in the training script.
 
 You can use the command to train your model in data parallel.
 ```
