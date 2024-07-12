@@ -10,7 +10,7 @@ from skimage.morphology import binary_dilation
 from skimage.morphology import cube
 import prody, argparse
 import glob, sys
-from unetr_pp_DP_inf_riconv import UNETR_PP
+from DRIVPokcet_net import DRIVPocket
 from openbabel import pybel
 from torch import nn
 from modules.riconv2_utils import compute_LRA
@@ -287,16 +287,8 @@ def test(is_dca, protein_path, label_paths, model, test_loader, gmaker_img,
     count = 0
     model.eval()
     dims = (28,65,65,65)
-    # print(test_loader.num_types(), dims)  # 28 (28, 65, 65, 65)
-    tensor_shape = (1,) + dims
-    # print('tensor_shape=', tensor_shape)  # (1, 28, 65, 65, 65)
-    # create tensor for input, centers and indices
-    input_tensor = torch.zeros(tensor_shape, dtype=torch.float32, device=device, requires_grad=True)
-    float_labels = torch.zeros((1, 4), dtype=torch.float32, device=device)
-    riconv_tensor = torch.empty((1,128,3), dtype=torch.float32, device=device)
+
     prot_prody = prody.parsePDB(protein_path)
-    # print('=== prot_prody ==', prot_prody.getCoords().shape)
-    pred_aa_list = []
     pred_pocket_coords_list = []
     proposal_list = []
     f_center_list = []
@@ -323,8 +315,6 @@ def test(is_dca, protein_path, label_paths, model, test_loader, gmaker_img,
                 pred = masks_pred
                 edge_pred = point_pred
                 edge_pred = (edge_pred > 0.5).float()
-                # print("1:")
-                # print(torch.sum(edge_pred))
                 if torch.sum(edge_pred>0):
                     edge, mask = get_edge_v2(protein_coords, edge_pred, center, pred.cpu(), gaussian_radius_multiple=3,
                                              radii_multiple=4,
@@ -333,116 +323,21 @@ def test(is_dca, protein_path, label_paths, model, test_loader, gmaker_img,
                     edge2, mask = get_edge_v2(protein_coords, edge_pred, center, pred.cpu(), gaussian_radius_multiple=1,
                                              radii_multiple=3,
                                              mask_threshold=1)
-                    edge_point, mask_point = get_edge_v2(protein_coords, edge_pred, center, pred.cpu(),
-                                                         gaussian_radius_multiple=1, radii_multiple=1,
-                                                         mask_threshold=1)
-                    # print("2:")
-                    # print(torch.sum(edge))
                     edge = edge.to(device)
-                    mask1 = (~mask).float().to(device)
-                    mask2 = (mask).float().to(device)
                     edge2 = edge2.to(device)
                     edge3 = edge - edge2
-                    # edge2 = mask2 * 3 - edge
-                    # edge2 = edge
-                    # edge2 = torch.where(edge2 >=2.5,0,edge2)
-                    # edge2 = torch.where(edge2 <=0.5,0,edge2)
                     pred2 = (pred>0.85).float()
-                    # pred2 = (pred>0.6).float()
                 else:
                     pred2 = pred
                     edge2 = torch.zeros_like(pred)
                     edge3= torch.zeros_like(pred)
             else:
                 masks_pred = model(input_tensor[:, :14])
-                # masks_pred = torch.sigmoid(masks_pred)
-                # masks_pred[masks_pred<0.7] = 0
 
 
-        # edge_fuse = -0.05 * mask1 * pred + 0.15 * mask2 * pred + 1 * pred + 0.25*edge*pred + 0.15*edge
-        #edge_fuse = -0.05 * mask1 * pred + 1.5 *edge2*pred + 1 * pred
-        # edge_fuse =  0.25*edge3 + 1 * pred2 + 0.25 * (1-edge2) + 1.5 *edge3*pred
-        # edge_fuse =  0.3*edge3 + 1 * pred2 + 2 *edge3*pred
-        # edge_fuse =  0.5*edge + 1 * pred2 + 1.5*edge3*pred
-        # edge_fuse =  0.1*edge3 + 1 * pred2 + 2 *edge3*pred
-        edge_fuse =  masks_pred
-        # edge =  masks_pred
-        # edge_fuse =  2*edge2*pred + 1 * pred2 + 1 *edge2
-        # edge_fuse =  0.3 *edge2+ 1*edge2*pred
-        # edge_fuse =  0.7*edge*pred
-        #edge_fuse =  0.5* edge2 + 0.8 * pred
-        #print(torch.sum(edge_fuse),torch.sum(edge_pred))
-        #edge_fuse = -0.2 * mask1 * pred+ 0.1 * edge2 * pred+ 1 * pred + 0.075 * edge2
-        #edge_fuse =  0.2 * edge2 * pred+ 0.8 * pred + 0.1* edge2
-        #edge_fuse =  0.2*mask2*pred + 0.8 * pred
-        # #edge_fuse =  1 * pred
-        # np.save("/home/dbw/PythonProject/DeepPocket_pp/saveimg/"+protein_path.split('/')[-1].split('.')[0]+"edge"+str(count)+".npy",np.where(edge_point.cpu().numpy()>0.5,1,0))
-        # np.save("/home/dbw/PythonProject/DeepPocket_pp/saveimg/"+protein_path.split('/')[-1].split('.')[0]+"pred"+str(count)+".npy", np.where(pred.cpu().numpy()>0.5,1,0))
-        # np.save("/home/dbw/PythonProject/DeepPocket_pp/saveimg/"+protein_path.split('/')[-1].split('.')[0]+"edgefuse"+str(count)+".npy", np.where(edge_fuse.cpu().numpy()>0.5,1,0))
-        # np.save("/home/dbw/PythonProject/DeepPocket_pp/saveimg/"+protein_path.split('/')[-1].split('.')[0]+"DP"+str(count)+".npy", np.where(edge_fuse.cpu().numpy()>0.5,1,0))
-
-        #
-        # slice_data = pred[0, 0, :, 33, :]
-        # slice_data = np.squeeze(slice_data)
-        # slice_data = slice_data.cpu().numpy()
-        #
-        # slice_edge = edge[ 0, 0, :, 33, :]
-        # slice_edge = np.squeeze(slice_edge)
-        # slice_edge = slice_edge.cpu().numpy()
-        # 创建热力图
-
-
-        # 添加颜色条
-
-        # 设置标题和坐标轴标签
-        # fig, axes = plt.subplots(1, 3, figsize=(15, 10))
-        #
-        # # 在第一个子图中绘制热力图
-        # axes[0].imshow(slice_data, cmap='viridis', origin='lower', interpolation='nearest')
-        # axes[0].set_title(f"Heatmap of Voxel Data on Slice 1")
-        # axes[0].set_xlabel("X")
-        # axes[0].set_ylabel("Y")
-        # axes[0].grid(False)
-        #
-        # # 在第二个子图中绘制热力图
-        # axes[1].imshow(slice_edge, cmap='viridis', origin='lower', interpolation='nearest')
-        # axes[1].set_title(f"Heatmap of Voxel Data on Slice 2")
-        # axes[1].set_xlabel("X")
-        # axes[1].set_ylabel("Y")
-        # axes[1].grid(False)
-        # plt.imshow(slice_data, cmap='viridis', alpha=0.5, origin='lower', interpolation='nearest')
-        # plt.imshow(slice_edge, cmap='plasma', alpha=0.5, origin='lower', interpolation='nearest')
-        #
-        # # 添加颜色条
-        #
-        #
-        # # 设置标题和坐标轴标签
-        # plt.title("Overlay of Two Heatmaps")
-        # plt.xlabel("X")
-        # plt.ylabel("Y")
-
-        # plt.imsave("/home/dbw/PythonProject/DeepPocket_pp/saveimg/"+protein_path.split('/')[-1].split('.')[0]+"edge.jpg",slice_edge)
-        # plt.imsave("/home/dbw/PythonProject/DeepPocket_pp/saveimg/"+protein_path.split('/')[-1].split('.')[0]+"pred.jpg",slice_data)
-        # 调整布局，以确保子图之间不重叠
-        # plt.tight_layout()
-
-
-
-
-        #edge_fuse = 0.3 * edge+  0.8 * mask*pred + 0.8 *pred
-        #print(edge.shape)
-        #print(pred.shape)
-
-        #edge_fuse = pred
-        #edge_fuse = edge
-        #edge_fuse =  0.5 * edge + 1 * edge*pred + 1*pred
-
+        edge_fuse =  0.3*edge3 + 1 * pred2 + 1.5 *edge3*pred
         masks_pred = edge_fuse.detach().cpu()
         masks_pred = preprocess_output(masks_pred[0], args.threshold)
-
-        #print('processed shape=', masks_pred.shape)  # torch.Size([65, 65, 65])
-
-        # predict binding site residues
         pred_coords = Output_Coordinates(masks_pred, center)  # 预测的cavity坐标，float,小数
         # print(pred_coords)
         pred_aa = predicted_AA(pred_coords, prot_prody, args.mask_dist)  # protein距离预测cavity比较近的原子的索引
@@ -497,7 +392,6 @@ def test(is_dca, protein_path, label_paths, model, test_loader, gmaker_img,
                 succ += 1
                 # cavity: coord->numpy, dilation, numpy->
             dvo = 0
-            #DVO_list={}
             if args.is_dvo:
                 if min_dist <= 4:
                     box_size = 80
@@ -510,70 +404,6 @@ def test(is_dca, protein_path, label_paths, model, test_loader, gmaker_img,
                     pred_coords_set = set([tuple(x) for x in (match_pred_pocket_coords / 2).astype(int)])
                     truth_coords_set = set([tuple(x) for x in (label_coords / 2).astype(int)])
                     dvo = len(pred_coords_set & truth_coords_set) / len(pred_coords_set | truth_coords_set)
-                    # if dvo >0.65:
-                    #     np.save(
-                    #         "/home/dbw/PythonProject/DeepPocket_pp/saveimg/" + protein_path.split('/')[-1].split('.')[
-                    #             0] + "_edge" + str(count) + ".npy", np.where(edge_point.cpu().numpy() > 0.5, 1, 0))
-                    #     np.save(
-                    #         "/home/dbw/PythonProject/DeepPocket_pp/saveimg/" + protein_path.split('/')[-1].split('.')[
-                    #             0] + "_pred" + str(count) + ".npy", np.where(pred.cpu().numpy() > 0.5, 1, 0))
-                    #     np.save(
-                    #         "/home/dbw/PythonProject/DeepPocket_pp/saveimg/" + protein_path.split('/')[-1].split('.')[
-                    #             0] + "_edge_fuse" + str(count) + ".npy", np.where(edge_fuse.cpu().numpy() > 0.5, 1, 0))
-                    if protein_path.split('/')[-1].split('.')[
-                                0] in {'2g25A','2w1aC'}:
-                        # print(dvo)
-                        if dvo > dvo_min:
-                            # np.save(
-                            #     "/home/dbw/PythonProject/DeepPocket_pp/saveimg/" + protein_path.split('/')[-1].split('.')[
-                                    # 0] + "_edge" + str(count) + ".npy", np.where(edge_point.cpu().numpy() > 0.5, 1, 0))
-                            # np.save(
-                            #     "/home/dbw/PythonProject/DeepPocket_pp/saveimg/" + protein_path.split('/')[-1].split('.')[
-                            #         0] + "_pred" + str(count) + ".npy", np.where(pred.cpu().numpy() > 0.5, 1, 0))
-                            # print(np.max(edge.cpu().numpy()))
-                            # np.save(
-                            #     "/home/dbw/PythonProject/DeepPocket_pp/saveimg/" + protein_path.split('/')[-1].split('.')[
-                            #         0] + "_DP" + str(count) + ".npy", np.where(pred_coords > 0.5, 1, 0))
-                                    # 0] + "_GL" + str(count) + ".npy", edge_fuse.cpu().numpy())
-                            dvo_min = dvo
-                    #dvo_dict[os.path.basename(protein_path).split('.')[0] + str(ii_)] = round(dvo, 4)
-                #DVO_list.append(dvo)
-                # if min_dist <= 4:
-                #
-                #     # '''
-                #     if test_set == 'pdbbind':
-                #         protien_array = protien_array[0].data.cpu().numpy()
-                #         protien_array = protien_array.transpose((1, 2, 3, 0))
-                #         protein_coord = []
-                #         for k1 in range(65):
-                #             for k2 in range(65):
-                #                 for k3 in range(65):
-                #                     # print(protien_array[k1, k2, k3].shape)  #(18)
-                #                     if np.any(protien_array[k1, k2, k3]):
-                #                         protein_coord.append(np.asarray([k1, k2, k3]))
-                #         protein_coord = np.asarray(protein_coord)
-                #         protein_coord = protein_coord / 2 - 65//4 + f_center_
-                #         ligand_dist = cdist(match_pred_pocket_coords, protein_coord)
-                #         distance = 6
-                #         binding_indices = np.where(np.any(ligand_dist <= distance, axis=0))
-                #         match_pred_pocket_coords = protein_coord[binding_indices]
-                #         ligand_dist = cdist(label_coords, protein_coord)
-                #         distance = 2
-                #         binding_indices = np.where(np.any(ligand_dist <= distance, axis=0))
-                #         label_coords = protein_coord[binding_indices].astype('float32')
-                #     else:
-                #         box_size = 80
-                #         label_grid, label_center = coors2grid(label_coords, box_size=box_size)
-                #         grid_np = binary_dilation(label_grid, cube(3))
-                #         grid_indices = np.argwhere(grid_np == 1)
-                #         label_coords = grid_indices - (box_size / 2)
-                #         label_coords += label_center
-                #
-                #     pred_coords_set = set([tuple(x) for x in (match_pred_pocket_coords / 2).astype(int)])
-                #     truth_coords_set = set([tuple(x) for x in (label_coords / 2).astype(int)])
-                #     if len(pred_coords_set | truth_coords_set)==0:
-                #         continue
-                #     dvo = len(pred_coords_set & truth_coords_set) / len(pred_coords_set | truth_coords_set)
             DVO_list.append(dvo)
 
     return succ, num_cavity, DVO_list
@@ -608,10 +438,6 @@ def get_acc(seg_model, DATA_ROOT, args, test_set='coach420', is_dca=0, mask2=Non
         protein_nowat_file = protein_path.replace('.pdb', '_nowat.pdb')
         protein_name = os.path.basename(protein_path)
         id = protein_name.rsplit('.', 1)[0]
-        # print(id)
-        # if id not in {'2g25A','2w1aC'}:
-        # if id not in {'1a26A','1ch8A'}:
-        #     continue
         tmp_dir = join(save_dir, id)
         seg_types = '{}/{}_nowat_out/pockets/bary_centers_ranked.types'.format(tmp_dir, id)
         if not os.path.exists(seg_types):
@@ -624,7 +450,6 @@ def get_acc(seg_model, DATA_ROOT, args, test_set='coach420', is_dca=0, mask2=Non
             continue
 
         seg_gmaker, seg_eptest = get_model_gmaker_eprovider(seg_types, 1, join(args.DATA_ROOT, 'test_types', test_set), dims=32)
-        #seg_gmaker, seg_eptest = get_model_gmaker_eprovider(seg_types, 1, join(args.DATA_ROOT, 'test_types', test_set), dims=31.5)
         dx_name = protein_nowat_file.replace('.pdb', '')
 
         tmp_succ, num_cavity, DVO_list = test(is_dca, protein_path, label_paths[i], seg_model, seg_eptest, seg_gmaker,
@@ -650,19 +475,6 @@ def get_acc(seg_model, DATA_ROOT, args, test_set='coach420', is_dca=0, mask2=Non
     print(print_info)
     return succ / total
 
-def train():
-    with wandb.init(project='deep-pocket-pp-cemera_test', name="cemera_test2") as run:
-        config = run.config
-
-        # 使用当前的系数组合计算表达式
-        dca,dvo = get_acc(model, DATA_ROOT, args, test_set=test_set, is_dca=is_dca,
-                         mask2=config.mask2, edge_pred=config.edge_pred,edge=config.edge)
-
-        # 计算性能指标
-
-        # 记录指标
-        wandb.log({"dca": dca,"DVO":dvo, "performance_metric":dca+dvo})
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Test')
@@ -679,9 +491,9 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--mini', type=int, default=-1)
     parser.add_argument('-s', '--sweep', type=int, default=0)
     parser.add_argument('-D', '--DP', type=int, default=0)
-    parser.add_argument('--DATA_ROOT', type=str, default='/home/dbw/PythonProject/DeepPocket_pp/coach420')
+    parser.add_argument('--DATA_ROOT', type=str, default='./coach420')
     parser.add_argument('--test_set', type=str, default='coach420') # coach420,sc6k,holo4k,pdbbind,apoholo
-    parser.add_argument('--model_path', type=str,default='/home/dbw/PythonProject/DeepPocket_pp/model_saves/seg_test_3_14_best_test_loss_107.pth.tar')
+    parser.add_argument('--model_path', type=str,default='./model_saves/checkpoint.pth.tar')
     parser.add_argument('-d', '--data_dir', type=str, required=False,
                     help="Root directory of data", default="")
     args = parser.parse_args()
@@ -693,7 +505,7 @@ if __name__ == '__main__':
     DATA_ROOT = args.DATA_ROOT
     ckpt_path = args.model_path
 
-    model = UNETR_PP(in_channels=32,
+    model = DRIVPocket(in_channels=14,
                      out_channels=1,
                      feature_size=32,
                      num_heads=8,
@@ -704,35 +516,18 @@ if __name__ == '__main__':
     model.to(device)
     model = nn.DataParallel(model)
 
-    model.load_state_dict(torch.load(ckpt_path)['model_state_dict'])
+    model.load_state_dict(torch.load(ckpt_path))
 
-    #model.load_state_dict(model.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(ckpt_path)['model_state_dict'].items()}))
     print('load successfully,', ckpt_path)
     a = datetime.datetime.now()
 
-    sweep_config = {
-        'method': 'random',  # 可以是 grid, random 或 bayes
-        'metric': {
-            'name': 'performance_metric',
-            'goal': 'maximize'  # 或者 'minimize', 取决于你的具体情况
-        },
-        'parameters': {
-            'mask2': {'values' : np.arange(0, 0.5, 0.1).tolist()},
-            'edge_pred':{'values' : np.arange(0, 0.6, 0.1).tolist()},
-            'edge': {'values' : np.arange(0, 0.6, 0.1).tolist()}
-        }
-    }
-    if args.sweep:
-        sweep_id = wandb.sweep(sweep_config, project="deep-pocket-pp-cemera_test")
-        wandb.agent(sweep_id, train)
-    else:
-        get_acc(model, DATA_ROOT, args, test_set=test_set, is_dca=is_dca, )
-        b = datetime.datetime.now()
-        print('time:', str(b - a))
-        print(ckpt_path)
-        print('ite=', args.ite)
-        print('test_set={}'.format(test_set))
-        print('is_mask={}'.format(args.is_mask))
-        print('is_dca={}'.format(is_dca))
-        if args.is_dca:
-            print('top-(n+{})'.format(args.top_n))
+    get_acc(model, DATA_ROOT, args, test_set=test_set, is_dca=is_dca, )
+    b = datetime.datetime.now()
+    print('time:', str(b - a))
+    print(ckpt_path)
+    print('ite=', args.ite)
+    print('test_set={}'.format(test_set))
+    print('is_mask={}'.format(args.is_mask))
+    print('is_dca={}'.format(is_dca))
+    if args.is_dca:
+        print('top-(n+{})'.format(args.top_n))
