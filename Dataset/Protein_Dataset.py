@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from skimage.morphology import binary_dilation
 from skimage.morphology import cube
-from molgrid import MolDataset
+from MolDatasets import MolDataset
 import molgrid
 import numpy as np
 import matplotlib.pyplot as plt
@@ -183,72 +183,3 @@ class TrainScPDB(MolDataset):
         #print(Feature.shape)
         return Feature
 
-
-
-if __name__ == "__main__":
-    train_ProteinDataset = TrainScPDB('/home/dbw/PythonProject/DeepPocket_pp/seg_scPDB_train0.types',data_root = "/home/dbw/ScPDB/scPDB", recmolcache = "scPDB_new.molcache2", cache_structs=True)
-
-    loader = torch.utils.data.DataLoader(train_ProteinDataset)
-    ratio = 0.0
-    ratio2 = 0.0
-    i=1
-    for Batch in loader:
-        input_tensor, riconv_tensor, mask_tensor, centers, _, feature, edge_pocket,protein_coords = Batch
-        # edge,mask  = get_edge(protein_coords, edge_pocket, centers)
-        # #visualize_voxels(edge)
-        # if torch.sum(edge) !=0:
-        #     print(torch.sum(edge_pocket))
-        #    # print(torch.sum(mask * mask_tensor))
-        #     print(torch.sum(mask))
-        #     slice_data = mask_tensor[0, :, :,33, :]
-        #     slice_data = np.squeeze(slice_data)
-        #     slice_data = slice_data.numpy()
-        #     input_tensor = input_tensor[0]
-        #     input_tensor = torch.sum(input_tensor, dim=0, keepdim=True)
-        #     slice_edge = edge[0, :, :,33, :]
-        #     slice_edge = np.squeeze(slice_edge)
-        #     slice_edge = slice_edge.numpy()
-        #     # 创建热力图
-        #
-        #     # 添加颜色条
-        #
-        #     # 设置标题和坐标轴标签
-        #     fig, axes = plt.subplots(1, 3, figsize=(15, 10))
-        #
-        #     # 在第一个子图中绘制热力图
-        #     axes[0].imshow(slice_data, cmap='viridis', origin='lower', interpolation='nearest')
-        #     axes[0].set_title(f"Heatmap of Voxel Data on Slice 1")
-        #     axes[0].set_xlabel("X")
-        #     axes[0].set_ylabel("Y")
-        #     axes[0].grid(False)
-        #
-        #     # 在第二个子图中绘制热力图
-        #     axes[1].imshow(slice_edge, cmap='viridis', origin='lower', interpolation='nearest')
-        #     axes[1].set_title(f"Heatmap of Voxel Data on Slice 2")
-        #     axes[1].set_xlabel("X")
-        #     axes[1].set_ylabel("Y")
-        #     axes[1].grid(False)
-        #     plt.imshow(slice_data, cmap='viridis', alpha=0.5, origin='lower', interpolation='nearest')
-        #     plt.imshow(slice_edge, cmap='plasma', alpha=0.5, origin='lower', interpolation='nearest')
-        #
-        #     # 添加颜色条
-        #
-        #
-        #     # 设置标题和坐标轴标签
-        #     plt.title("Overlay of Two Heatmaps")
-        #     plt.xlabel("X")
-        #     plt.ylabel("Y")
-        #
-        #     plt.show()
-        #     # 调整布局，以确保子图之间不重叠
-        #     plt.tight_layout()
-        #     ratio += torch.sum(edge*mask_tensor)/torch.sum(edge)
-        #     ratio2 += torch.sum(mask*mask_tensor)/torch.sum(mask)
-
-        #     i=i+1
-        # # if i >5:
-        #     break
-    print(ratio/i)
-    print(ratio2/i)
-    # print(ratio/len(loader))
-    # print(ratio/len(loader))
