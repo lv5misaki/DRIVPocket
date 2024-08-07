@@ -50,13 +50,13 @@ python test.py --test_set coach420 --DATA_ROOT coach420 --model_path checkpoint.
 To test DRIVPocket on COACH420 in terms of DCA top-n, run the following command:
 
 ```
-python test.py --test_set coach420 --is_dca 1 --rank 0 --DATA_ROOT coach420 --model_path checkpoint.pth.tar
+python test.py --test_set coach420 --is_dca 1 -n 0 --DATA_ROOT coach420 --model_path checkpoint.pth.tar
 ```
 
 To test DRIVPocket on COACH420 in terms of DCA top-n+2, run the following command:
 
 ```
-python test.py --test_set coach420 --is_dca 1 --rank 2 --DATA_ROOT coach420 --model_path checkpoint.pth.tar
+python test.py --test_set coach420 --is_dca 1 -n 2 --DATA_ROOT coach420 --model_path checkpoint.pth.tar
 ```
 
 
